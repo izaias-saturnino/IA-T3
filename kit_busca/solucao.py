@@ -101,23 +101,23 @@ def get_best_astar_hamming_distance(node_list:list[Nodo]):
             best_node = node
     return best_node
 
-def manhattan_distance(estado_atual, estado2):
+def manhattan_distance(estado_atual):
     estado_list = list(estado_atual)
 
-    matrix = [["0","0","0"],
-              ["0","0","0"],
-              ["0","0","0"]]
+    matrix = [[0,0,0],
+              [0,0,0],
+              [0,0,0]]
     
     for i in range(3):
         for j in range(3):
-            matrix[i][j] = estado_list[3*i+j]
+            if estado_list[3*i+j] == "_":
+                estado_list[3*i+j] = "9"
+            matrix[i][j] = int(estado_list[3*i+j])
 
     distance = 0
 
     for i in range(3):
         for j in range(3):
-            if matrix[i][j] == "_":
-                matrix[i][j] = 9
             currentCol = j
             current_row = i
             expectedCol = (matrix[i][j] - 1) % 3
@@ -134,6 +134,15 @@ def manhattan_distance(estado_atual, estado2):
             distance += row_diff + col_diff
 
     return distance
+
+def get_best_astar_manhattan_distance(node_list:list[Nodo]):
+    best_node = None
+    for node in node_list:
+        if best_node == None:
+            best_node = node
+        elif node.custo + manhattan_distance(node.estado) < best_node.custo + manhattan_distance(best_node.estado):
+            best_node = node
+    return best_node
 
 def get_action_list(nodo:Nodo):
     action_list = []
@@ -167,24 +176,26 @@ def astar_hamming(estado:str)->list[str]:
     # substituir a linha abaixo pelo seu codigo
     estado_final = "12345678_"
     
-    x = []
-    f = []
+    x = set(())
+    f = set(())
     first_node = Nodo(estado, None, None, 0)
-    f.append(first_node)
+    f.add(first_node)
 
-    while f != []:
+    while len(f) != 0:
+        # print("f")
+        # print_node_list(f)
         v = get_best_astar_hamming_distance(f)
         if(v == None):
             return None
-        f.remove(v)
+        f.discard(v)
         if(v.estado == estado_final):
             return get_action_list(v)
         if(v.estado not in x):
-            x.append(v.estado)
+            x.add(v.estado)
             node_list = expande(v)
             for node in node_list:
                 if(node.estado not in x):
-                    f.append(node)
+                    f.add(node)
     return None
 
 def astar_manhattan(estado:str)->list[str]:
@@ -197,7 +208,29 @@ def astar_manhattan(estado:str)->list[str]:
     :return:
     """
     # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    estado_final = "12345678_"
+    
+    x = set(())
+    f = set(())
+    first_node = Nodo(estado, None, None, 0)
+    f.add(first_node)
+
+    while len(f) != 0:
+        # print("f")
+        # print_node_list(f)
+        v = get_best_astar_manhattan_distance(f)
+        if(v == None):
+            return None
+        f.discard(v)
+        if(v.estado == estado_final):
+            return get_action_list(v)
+        if(v.estado not in x):
+            x.add(v.estado)
+            node_list = expande(v)
+            for node in node_list:
+                if(node.estado not in x):
+                    f.add(node)
+    return None
 
 def bfs(estado:str)->list[str]:
     """
