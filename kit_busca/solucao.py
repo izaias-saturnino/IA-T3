@@ -1,3 +1,5 @@
+import queue
+import time
 from typing import Iterable, Set, Tuple
 from copy import deepcopy
 
@@ -18,6 +20,8 @@ class Nodo:
         self.acao = acao
         self.custo = custo
         self.pai = pai
+    def __lt__(self, other):
+        return 0< 1
 
 def matrix_to_string(matrix):
     col_string = ["", "", ""]
@@ -88,18 +92,9 @@ def hamming_distance(estado_atual):
     estado_final = "12345678_"
     distance = 0
     for i in range(len(estado_atual)):
-        if(estado_atual[i] != estado_final[i]):
+        if(estado_atual[i] != estado_final[i] and estado_atual[i] != "_"):
             distance += 1
     return distance
-
-def get_best_astar_hamming_distance(node_list:list[Nodo]):
-    best_node = None
-    for node in node_list:
-        if best_node == None:
-            best_node = node
-        elif node.custo + hamming_distance(node.estado) < best_node.custo + hamming_distance(best_node.estado):
-            best_node = node
-    return best_node
 
 def manhattan_distance(estado_atual):
     estado_list = list(estado_atual)
@@ -135,15 +130,6 @@ def manhattan_distance(estado_atual):
 
     return distance
 
-def get_best_astar_manhattan_distance(node_list:list[Nodo]):
-    best_node = None
-    for node in node_list:
-        if best_node == None:
-            best_node = node
-        elif node.custo + manhattan_distance(node.estado) < best_node.custo + manhattan_distance(best_node.estado):
-            best_node = node
-    return best_node
-
 def get_action_list(nodo:Nodo):
     action_list = []
 
@@ -174,28 +160,44 @@ def astar_hamming(estado:str)->list[str]:
     :return:
     """
     # substituir a linha abaixo pelo seu codigo
+    start = time.time()
+    expanded_nodes = 0
     estado_final = "12345678_"
     
     x = set(())
-    f = set(())
-    first_node = Nodo(estado, None, None, 0)
-    f.add(first_node)
+    f = queue.PriorityQueue()
+    v = Nodo(estado, None, None, 0)
+    f.put((v.custo + hamming_distance(v.estado),v))
 
-    while len(f) != 0:
-        # print("f")
-        # print_node_list(f)
-        v = get_best_astar_hamming_distance(f)
-        if(v == None):
-            return None
-        f.discard(v)
+    while not f.empty():
+        (_,v) = f.get()
         if(v.estado == estado_final):
+            end = time.time()
+            print("estado")
+            print(estado)
+            print("expanded_nodes")
+            print(expanded_nodes)
+            print("cost")
+            print(v.custo)
+            print("time")
+            print(end-start)
             return get_action_list(v)
         if(v.estado not in x):
             x.add(v.estado)
             node_list = expande(v)
+            expanded_nodes += 1
             for node in node_list:
                 if(node.estado not in x):
-                    f.add(node)
+                    f.put((node.custo + hamming_distance(node.estado),node))
+        end = time.time()
+    print("estado")
+    print(estado)
+    print("expanded_nodes")
+    print(expanded_nodes)
+    print("cost")
+    print(v.custo)
+    print("time")
+    print(end-start)
     return None
 
 def astar_manhattan(estado:str)->list[str]:
@@ -208,28 +210,44 @@ def astar_manhattan(estado:str)->list[str]:
     :return:
     """
     # substituir a linha abaixo pelo seu codigo
+    start = time.time()
+    expanded_nodes = 0
     estado_final = "12345678_"
     
     x = set(())
-    f = set(())
-    first_node = Nodo(estado, None, None, 0)
-    f.add(first_node)
+    f = queue.PriorityQueue()
+    v = Nodo(estado, None, None, 0)
+    f.put((v.custo + manhattan_distance(v.estado),v))
 
-    while len(f) != 0:
-        # print("f")
-        # print_node_list(f)
-        v = get_best_astar_manhattan_distance(f)
-        if(v == None):
-            return None
-        f.discard(v)
+    while not f.empty():
+        (_,v) = f.get()
         if(v.estado == estado_final):
+            end = time.time()
+            print("estado")
+            print(estado)
+            print("expanded_nodes")
+            print(expanded_nodes)
+            print("cost")
+            print(v.custo)
+            print("time")
+            print(end-start)
             return get_action_list(v)
         if(v.estado not in x):
             x.add(v.estado)
             node_list = expande(v)
+            expanded_nodes += 1
             for node in node_list:
                 if(node.estado not in x):
-                    f.add(node)
+                    f.put((node.custo + manhattan_distance(node.estado),node))
+        end = time.time()
+    print("estado")
+    print(estado)
+    print("expanded_nodes")
+    print(expanded_nodes)
+    print("cost")
+    print(v.custo)
+    print("time")
+    print(end-start)
     return None
 
 def bfs(estado:str)->list[str]:
@@ -268,3 +286,11 @@ def astar_new_heuristic(estado:str)->list[str]:
     """
     # substituir a linha abaixo pelo seu codigo
     raise NotImplementedError
+
+def main():
+    str="2_3541687"
+    astar_hamming(str)
+    astar_manhattan(str)
+
+if __name__ == '__main__':
+    main()
